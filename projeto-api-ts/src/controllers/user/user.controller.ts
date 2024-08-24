@@ -22,7 +22,6 @@ export default class UserController {
         user.name = name
         user.email = email
         user.password = password + "-"
-
         await user.save()
 
         return res.json(user)
