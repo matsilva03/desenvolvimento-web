@@ -1,5 +1,6 @@
 import User from "../../models/user.entity"
 import { Request, Response } from "express"
+import bcrypt from "bcrypt"
 
 export default class UserController {
     static async index(req: Request, res: Response) {
@@ -21,9 +22,24 @@ export default class UserController {
 
         user.name = name
         user.email = email
-        user.password = password + "-"
+        user.password = bcrypt.hashSync(password, 12)
         await user.save()
 
         return res.json(user)
+    }
+
+    static async login(req: Request, res: Response) {
+        const { email, password } = req.body
+
+        const user = await User.findOneBy({ email })
+        const passwordUser = user?.password ?? ""
+
+        const passwordMatch = bcrypt.compareSync(password, passwordUser)
+
+        if (!passwordMatch) {
+            return res.status(401).json({ msg: "Usuário ou senha incorretos" })
+        }
+
+        res.status(200).send("Ok!")
     }
 }

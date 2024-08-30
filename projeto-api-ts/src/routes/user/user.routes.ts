@@ -5,5 +5,6 @@ const userRoutes = Router()
 
 userRoutes.get("/", UserController.index)
 userRoutes.post("/", UserController.store)
+userRoutes.post("/login", UserController.login)
 
 export default userRoutes
