@@ -18,7 +18,8 @@ export default class TaskController {
     }
 
     static async store(req: Request, res: Response) {
-        const { title, completed, userId } = req.body
+        const { title, completed } = req.body
+        const { userId } = req.headers
 
         if (!title || !userId) {
             return res.status(400).json({ msg: "O título é obrigatório" })
@@ -27,7 +28,7 @@ export default class TaskController {
         const task = new Task()
         task.title = title
         task.completed = completed
-        task.userId = userId
+        task.userId = Number(userId)
         await task.save()
 
         return res.status(201).json(task)

@@ -1,6 +1,7 @@
 import User from "../../models/user.entity"
 import { Request, Response } from "express"
 import bcrypt from "bcrypt"
+import Token from "../../models/token.entity"
 
 export default class UserController {
     static async index(req: Request, res: Response) {
@@ -32,14 +33,30 @@ export default class UserController {
         const { email, password } = req.body
 
         const user = await User.findOneBy({ email })
-        const passwordUser = user?.password ?? ""
+        const passwordUser = user
+            ? user.password
+            : "$2a$12$goovcbmKA4AWJQCiCeLI4ObmPGamAlYQ2l/diVEJ6lzoVrGpJ5e9i"
 
         const passwordMatch = bcrypt.compareSync(password, passwordUser)
 
-        if (!passwordMatch) {
+        if (!passwordMatch || !user) {
             return res.status(401).json({ msg: "Usuário ou senha incorretos" })
         }
 
-        res.status(200).send("Ok!")
+        await Token.delete({ userId: user.id })
+
+        const generatedToken = bcrypt
+            .hashSync(`${user.id}${Date.now()}`, 8)
+            .slice(-31)
+
+        const newToken = new Token()
+        newToken.token = generatedToken
+        newToken.userId = user.id
+        newToken.expiresAt = new Date(Date.now() + 60 * 60 * 1000)
+        newToken.refreshToken = generatedToken
+
+        await newToken.save()
+
+        res.json(newToken)
     }
 }

@@ -16,7 +16,7 @@ export default class Token extends BaseEntity {
     token!: string
 
     @Column()
-    refreshToken!: number
+    refreshToken!: string
 
     @Column()
     expiresAt!: Date
