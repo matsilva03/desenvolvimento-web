@@ -1,12 +1,15 @@
+import { join } from "path"
 import { DataSource } from "typeorm"
 
 const dataBase = new DataSource({
-    type: "sqlite",
-    database: "./src/database/database.sqlite",
-    entities: ["./src/models/*.ts"],
+    type: 'sqlite',
+    database: process.env.DATABASE || './src/database/database.sqlite',
+    entities: [
+      join(__dirname, '..', 'models/*.{ts,js}')
+    ],
     logging: true,
-    synchronize: true,
-})
+    synchronize: true
+  })
 
 dataBase
     .initialize()
